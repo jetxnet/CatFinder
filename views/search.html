@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Cat Fact Finder</title>
+	<meta name="description" content="Search for catFact quotes">
+
+	<!-- Stylesheet -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link href="../styles/app.css?id=4" rel="stylesheet" type="text/css">
+
+	<!-- JQuery -->
+	<script src="../js/jquery-2.1.4.min.js"></script>
+	<script src="../js/jquery-ui.js"></script>
+
+	<!-- JS Libs -->
+	<script src="../components/Constants.js?id=8"></script>
+	<script src="../components/Cat.js?v=21"></script>
+	<script src="../components/Modal.js?v=5"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+		crossorigin="anonymous"></script>
+	<script src="../js/components.js"></script>
+
+</head>
+
+<body>
+	<div>
+		<table>
+			<tr>
+				<td style="text-align:center">
+					<header>
+						<h1>Cat Fact Finder</h1>
+					</header>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<main>
+		<div class="col-md-12">
+			<button id="ButtonFavorites" type="button" class="btn btn-primary btn-sm"><span class=""></span> My
+				Favorites</button>
+		</div>
+		<div class="col-md-12">
+			<input id="searchTextBox" placeholder="Enter keyword(s) i.e. 'groom', 'brushed', 'tuxedo'" type="text">
+			<button id="ButtonSearch" type="submit" class="searchIcon"><span style="vertical-align:bottom"
+					class="searchIcon glyphicon glyphicon-search"></span></button>
+			<div id="status"></div>
+		</div>
+
+		<div class="col-md-12">
+			<div id="mainBoxMiddle" class="mainBoxMiddle ScrollStyle"></div>
+		</div>
+		<div class="row">
+			<div id="modalFavorite" class="small-nav col-lg-10 col-md-1 col-sm-1 col-xsm-1"
+				style="padding:14px; cursor:pointer;"></div>
+		</div>
+	</main>
+	<script>
+		// Normally these user actions would be handled in the component, but because you cannot import classes and call them directly (without common.js or a framework)
+		// then you first have to make a handler call here and then the component
+
+		displayResults = (searchQuery) => {
+
+			if (searchQuery) {
+				let catFact = new Cat();
+				let searchTemplate = "";
+
+				let catFactSearchPromise = catFact.Search(searchQuery).then(resSearch => {
+						// Onclicks are sometimes considered taboo but without a framwork you do not have ng directives (like in Angluar)
+						for (const item of resSearch) {
+							searchTemplate += `<div class='card'>
+													Fact: ${item.text}<br>`
+							if (item.isFavorite == true) {
+								searchTemplate += `<a id="${item.id}" onclick="initEditFavorite('${item.id}');" class="text-link" data-toggle="modal" href="#editFavoriteDialog"><button style="margin-top: 10px;" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Edit Favorite</button></a>`
+							} else {
+								searchTemplate += `<a style="padding:top:10px" id="${item.id}" onclick="initAddFavorite('${item.id}');" class="text-link" data-toggle="modal" href="#addFavoriteDialog"><button type="button" style="margin-top: 10px;" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Add Favorite</button></a>`
+							}
+							searchTemplate += `</div>`;
+						}
+						/* The mainBoxMiddle div could be populated by an Ember or Angular component template 
+  						   The ajax call could be placed into a component or service 
+   						   Models could be placed into a models folder */
+						if (searchTemplate != "") {
+							$(".mainBoxMiddle").html(searchTemplate);
+						} else {
+							$(".mainBoxMiddle").html("Your query returned no results, please try another search.");					
+						}
+				})
+			}
+		}
+
+		search = () => {
+			// Could do some search string validation here if needed
+			searchQuery = $("#searchTextBox").val();
+			displayResults(searchQuery);
+
+		}
+
+		getFavorites = () => {
+			let catFact = new Cat();
+			let catFactFavoritesPromise = catFact.ListFavorites().then(res => {
+				// create a list of cat fact ids as string delmited values and pass to search function
+				let factIDs = "";
+				let trailingComma = ",";
+				let x = 0;
+				for (const item of res) {
+					if (x == res.length - 1) {
+						trailingComma = "";
+					}
+					x++;
+					factIDs += item.factID += trailingComma;
+				}
+
+				searchQuery = factIDs; // return favorites when clicking 'My Favorites' button
+				displayResults(searchQuery);
+
+			})
+		}
+
+		initAddFavorite = (factID) => {
+			let modal = new Modal();
+			modalHTML = modal.AddFavorite(factID);
+			modalObject = {
+				backgroundColor: "background:white",
+				targetElement: "#modalFavorite",
+				title: "Add Favorite",
+				id: "addFavoriteDialog",
+				content: modalHTML,
+				modalCSS: "height:30vw;",
+				modalIcon: ""
+			};
+			modalDialogComponent(modalObject);
+		}
+
+		addFavorite = (factID) => {
+			$(`#${factID}`).hide();
+			let constants = new Constants();
+			let userID = constants.userID;
+			let comment = $('#favoriteComment').val();
+			let catFactFavoriteModel = { factID, comment, userID, description };
+			let catFact = new Cat();
+			catFact.AddFavorite(catFactFavoriteModel);
+			$('#addFavoriteDialog').modal('toggle');
+		}
+
+		initEditFavorite = (factID) => {
+			let modal = new Modal();
+			modalHTML = modal.EditFavorite(factID);
+			modalObject = {
+				backgroundColor: "background:white",
+				targetElement: "#modalFavorite",
+				title: "Edit Favorite",
+				id: "editFavoriteDialog",
+				content: modalHTML,
+				modalCSS: "height:30vw;",
+				modalIcon: ""
+			};
+			modalDialogComponent(modalObject);
+		}
+
+		editFavorite = (factID) => {
+			let constants = new Constants();
+			let userID = constants.userID;
+			let comment = $('#favoriteComment').val();
+			let catFactFavoriteModel = { factID, comment, userID };
+			let catFact = new Stock();
+			// Could first get the id of the favorite and then update by the id. There should be little if any performance cost by doing a lookup with 
+			// userID and catFact symbol (we already have these). In essence, this acts like a composite key in relational db terminology.
+			catFact.EditFavorite(catFactFavoriteModel);
+			$('#addFavoriteDialog').modal('toggle');
+		}
+
+		$("#ButtonSearch").on("click", function () {
+			search();
+		});
+
+		$("#ButtonFavorites").on("click", function () {
+			getFavorites();
+		});
+
+		var input = document.getElementById("searchTextBox");
+		input.addEventListener("keyup", function (event) {
+			event.preventDefault();
+			if (event.keyCode === 13) {
+				search();
+			}
+		});
+
+	</script>
+</body>
+
+</html>

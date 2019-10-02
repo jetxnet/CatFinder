@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Cat Facts Finder</title>
+	<meta name="description" content="Search for cat facts">
+
+	<!-- Stylesheet -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link href="styles/app.css?id=5" rel="stylesheet" type="text/css">
+
+	<!-- JQuery -->
+	<script src="/js/jquery-2.1.4.min.js"></script>
+
+	<!-- JS Libs -->
+	<script src="components/Constants.js?id=5"></script>
+	<script src="components/Login.js?v=18"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+
+</head>
+
+<body>
+	<table>
+		<tr>
+			<td style="text-align:center">
+				<header>
+					<h1>Cat Facts Finder</h1>
+				</header>
+			</td>
+		</tr>
+	</table>
+
+	<main>
+		<div class="row">
+			<div class="md-col-12" style="text-align:center">
+				<h2 style="color:black">Easily find and favorite facts about cats!</h2>
+			</div>
+		</div>
+		<div style="height:9vh">
+			<!-- filler div -->
+		</div>
+		<div class="panelLogin rcorners" style="text-align:center">
+			<div class="row">
+				<div class="col-md-6 col-md-offset-1"><input id="login"
+						style="margin-left:4vw; width:300px; height:30px;" type="text" name="login" placeholder="Email"
+						value="test@test.com"></div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 col-md-offset-1"><input id="pass"
+						style="margin-left:4vw; width:300px; height:30px; color:black" type="password" name="pass"
+						placeholder="Password" value="test"></div>
+			</div>
+			<div class="row">
+				<button id="ButtonLogin" type="button" class="btn buttonLogin">Login</button>
+			</div>
+			<div class="row">
+				<div style="height:1vh">
+					<!-- filler div -->
+				</div>
+				<div id="status"></div>
+			</div>
+		</div>
+		</div>
+	</main>
+	<script>
+		$("#ButtonLogin").on("click", function () {
+			let login = new Login($("#login").val(), $("#pass").val());
+			let loginPromise = login.Authenticate().then(res => {
+				// This would normally be done using router service if using frameworks like Ember or Angular
+				window.location.href = "views/search.html";
+
+			});
+		});
+	</script>
+</body>
+
+</html>
