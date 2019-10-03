@@ -69,6 +69,8 @@
 	</main>
 	<script>
 		$("#ButtonLogin").on("click", function () {
+		    // clear any previous logins 
+			localStorage.setItem("userID", "null");
 			let login = new Login($("#login").val(), $("#pass").val());
 			let loginPromise = login.Authenticate().then(res => {
 				// This would normally be done using router service if using frameworks like Ember or Angular

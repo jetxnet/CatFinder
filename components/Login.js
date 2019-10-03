@@ -26,7 +26,7 @@ class Login {
 							$("#status").html("Invalid Credentials, please try again");						
 					  }	else {
 						  
-						  // Set sessions
+						  // Set sessions, normally would have a login service with a framework
 							 localStorage.setItem("userID", resObj);						
 						
 						resolve(resObj);						

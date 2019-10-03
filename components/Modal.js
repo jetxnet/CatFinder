@@ -31,6 +31,9 @@ class Modal {
 	}
 
 	EditFavorite(factID) {
+
+		let favoriteComment = sessionStorage.getItem('favoriteComment');
+
 		var modalHTML = "<div class='body_text'>Update your comment for this favorite</div>"
 		modalHTML += '<fieldset>'
 		modalHTML += '<table width="100%">'
@@ -40,7 +43,7 @@ class Modal {
 		modalHTML += ''
 		modalHTML += '</td>'
 		modalHTML += '<td>'
-		modalHTML += '<textarea style="width:340px" name="favoriteComment" id="favoriteComment" placeholder="Enter a comment (optional)" value=""></textarea>'
+		modalHTML += `textarea style="width:340px" name="favoriteComment" id="favoriteComment" placeholder="Enter a comment (optional)" value="">${favoriteComment}</textarea>`
 		modalHTML += '</td>'
 		modalHTML += '</tr>'
 		modalHTML += '<tr>'

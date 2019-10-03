@@ -63,8 +63,15 @@
 		</div>
 	</main>
 	<script>
+	
 		// Normally these user actions would be handled in the component, but because you cannot import classes and call them directly (without common.js or a framework)
 		// then you first have to make a handler call here and then the component
+
+		// If not logged in, kick back to main (simple forms authentication), normally handled by a login service. For purposes of this demo, only a few strings are using
+		// local session storage. 
+		if (localStorage.getItem("userID") == null) {
+			window.location.href = "../index.html"; // login screen for this app
+		}
 
 		displayResults = (searchQuery) => {
 
@@ -78,7 +85,7 @@
 							searchTemplate += `<div class='card'>
 													Fact: ${item.text}<br>`
 							if (item.isFavorite == true) {
-								searchTemplate += `<a id="${item.id}" onclick="initEditFavorite('${item.id}');" class="text-link" data-toggle="modal" href="#editFavoriteDialog"><button style="margin-top: 10px;" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Edit Favorite</button></a>`
+								searchTemplate += `<a id="${item.id}" onclick="initEditFavorite('${item.id}');" class="text-link" data-toggle="modal" href="#editFavoriteDialog"><button type="button" style="margin-top:10px; margin-right:5px" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Edit</button><button type="button" style="margin-top:10px" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-trash"></span> Delete</button></a>`
 							} else {
 								searchTemplate += `<a style="padding:top:10px" id="${item.id}" onclick="initAddFavorite('${item.id}');" class="text-link" data-toggle="modal" href="#addFavoriteDialog"><button type="button" style="margin-top: 10px;" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-edit"></span> Add Favorite</button></a>`
 							}
@@ -100,7 +107,6 @@
 			// Could do some search string validation here if needed
 			searchQuery = $("#searchTextBox").val();
 			displayResults(searchQuery);
-
 		}
 
 		getFavorites = () => {
@@ -147,10 +153,21 @@
 			let catFactFavoriteModel = { factID, comment, userID, description };
 			let catFact = new Cat();
 			catFact.AddFavorite(catFactFavoriteModel);
+			statusMessage("Add");
 			$('#addFavoriteDialog').modal('toggle');
 		}
 
 		initEditFavorite = (factID) => {
+			let stock = new Cat();
+			let catFactFavoritesPromise = stock.GetFavorite(factID).then(res => {
+				let comment = res.comment;
+				/*Not a big fan of session in other languages but JS session you have more control over. I normally wouldn't use in JS
+				  but with modals is much easier for passing vals with a promise. Without that, the promise cannot pass directly to or initialize
+				  the modal, not even through a callback. But, you don't have to use modals though. Frameworks could handle this through a custom servce.*/ 
+				sessionStorage.removeItem('favoriteComment'); // clear from memory
+				sessionStorage.setItem('favoriteComment', comment); 	
+			})
+
 			let modal = new Modal();
 			modalHTML = modal.EditFavorite(factID);
 			modalObject = {
@@ -170,7 +187,7 @@
 			let userID = constants.userID;
 			let comment = $('#favoriteComment').val();
 			let catFactFavoriteModel = { factID, comment, userID };
-			let catFact = new Stock();
+			let catFact = new Cat();
 			// Could first get the id of the favorite and then update by the id. There should be little if any performance cost by doing a lookup with 
 			// userID and catFact symbol (we already have these). In essence, this acts like a composite key in relational db terminology.
 			catFact.EditFavorite(catFactFavoriteModel);
@@ -185,6 +202,16 @@
 			getFavorites();
 		});
 
+		statusMessage = (msgType) => {
+			if ((msgType) == "Add") {
+				$("#status").html("Added successfully!")
+			} 
+			if ((msgType) == "Edit") {
+				$("#status").html("Updated successfully!")
+			} 
+			setTimeout(function () { $("#status").html("") }, 5000); // clear message after 5 secs
+		}
+
 		var input = document.getElementById("searchTextBox");
 		input.addEventListener("keyup", function (event) {
 			event.preventDefault();
@@ -192,6 +219,10 @@
 				search();
 			}
 		});
+
+		$(document).ready(function () {
+
+		});		
 
 	</script>
 </body>

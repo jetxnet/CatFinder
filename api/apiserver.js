@@ -88,6 +88,22 @@ MongoClient.connect("mongodb://localhost:27017/cats", function (err, db) {
 		})
 	})
 
+	app.get("/getcatfavorite/:userID/:catID", function (req, res) {
+		const userID = req.params.userID;
+		const catID = req.params.catID;
+		favorites.findOne({ userID: userID, catID: catID }, function (err, item) {
+			if (err) {
+				console.log(error);
+			} else {
+				if (item != null) {
+					res.json(item);
+				} else {
+					res.json('fail');
+				}
+			}
+		})
+	})		
+
 	app.post("/addcatfavorite", function (req, res) {
 		let item = req.body;
 		db.collection("favorites").insertOne(item, function (err, res) {
@@ -109,6 +125,17 @@ MongoClient.connect("mongodb://localhost:27017/cats", function (err, db) {
 			}
 		})
 	})	
+
+	app.post("/removestockfavorite", function (req, res) {
+		let item = req.body;
+		db.collection("favorites").remove({factID: req.body.factID, userID: req.body.userID}, function (err, res) {
+			if (err) {
+				console.log(err);
+			} else {
+				console.log("1 favorite record removed");
+			}
+		})
+	})		
 
 	app.get("/catlistfavorites/:userID", function (req, res) {
 		const userID = req.params.userID;
